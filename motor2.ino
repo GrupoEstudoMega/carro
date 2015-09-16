@@ -1,7 +1,11 @@
+#include <Servo.h>
+ 
+#define SERVO 6
+
+#define LEDPin 13
+
 int trigPin = 9;
 int echoPin = 8;
-// Pin 13 has an LED connected on most Arduino boards.
-// give it a name:
 int led = 3;
 int velocidade = 50;
 int motor1pin1 = 3;
@@ -11,10 +15,14 @@ int motor2pin1 = 12;
 int motor2pin2 = 11;
 int motor2vel = 10;
 
+Servo s;
+
 unsigned long time;
 // the setup routine runs once when you press reset:
 void setup() {
+  s.attach(SERVO);
   Serial.begin(9600);
+  s.write(0);
   // initialize the digital pin as an output.
   pinMode(motor1pin1, OUTPUT);
   pinMode(motor1pin2, OUTPUT);
@@ -35,13 +43,16 @@ void motor(long dist) {
   if (velocidade > 255){
     velocidade = 255;
   }
-  //Serial.println("hora");
-  //Serial.print(millis() - time);
+  Serial.println("hora");
+  
   unsigned long distanciaparada = 0.0;
-  if (time > 3000)
+  //Serial.println(millis());
+  unsigned long tempoDesdeVirar = millis() - time;
+  Serial.println(tempoDesdeVirar);
+  if (tempoDesdeVirar > 2000)
     distanciaparada = 100;
   else
-    distanciaparada = 30 + (time / 100);
+    distanciaparada = 30 + (tempoDesdeVirar / 100);
  
   if (dist < distanciaparada){
     
@@ -52,7 +63,7 @@ void motor(long dist) {
     digitalWrite(motor2pin2, LOW);
     analogWrite(motor1vel, velocidade);
     analogWrite(motor2vel, velocidade);
-    delay(600);
+    delay(400);
     time = millis();
   }  else {
     digitalWrite(motor1pin1, HIGH); 
@@ -65,7 +76,8 @@ void motor(long dist) {
   //  digitalWrite(3, HIGH);
   //  digitalWrite(4, HIGH);
   //}
-  Serial.println(dist);
+  //s.write(dist);
+  //Serial.println(dist);
   analogWrite(motor1vel, velocidade);
   analogWrite(motor2vel, velocidade);
   
@@ -89,8 +101,9 @@ long sensordistancia() {
 // the loop routine runs over and over again forever:
 void loop() {
   delay(100);
-  
-  motor(sensordistancia());
+  long distancia = sensordistancia();
+  Serial.println(distancia);
+  s.write(distancia);
+  motor(distancia);
   //Serial.println(sensordistancia());
 }
-
